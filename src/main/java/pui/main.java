@@ -1,11 +1,15 @@
 package pui;
 
+import java.awt.HeadlessException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.JOptionPane;
 
 public class main {
     public static void main(String[] args) {
-        GUI gui = new GUI();
-
+        ActionLog actionlog = new ActionLog();
+        GUI gui = new GUI(actionlog);
         List<Card> alicehand = new ArrayList<>();
         alicehand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
         alicehand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
@@ -20,24 +24,61 @@ public class main {
         community.add(new Card(Card.Rank.ACE, Card.Suit.HEARTS));
         community.add(new Card(Card.Rank.THREE, Card.Suit.HEARTS));
         community.add(new Card(Card.Rank.JACK, Card.Suit.DIAMONDS));
+        community.add(new Card(Card.Rank.THREE, Card.Suit.HEARTS));
+        community.add(new Card(Card.Rank.JACK, Card.Suit.DIAMONDS));
 
-        // Run game logic in a separate thread
-       
+        ArrayList<Integer> pot = new ArrayList<>();
+        pot.add(3000);
+        pot.add(1200);
+        pot.add(1200);
+
+
             try {
                 // Alice's turn
-                String actionAlice = gui.setTXHM(player, community, true).get();
-                System.out.println("Alice pressed: " + actionAlice);
-
+                PlayerAction action1;
+                while (true) {
+                    action1 = gui.setTXHM(player, community,pot,false).get(); 
+                    int amount = action1.getAmount();
+                    if (action1.getType() == ActionType.BET || action1.getType() == ActionType.RAISE) {
+                        if (amount > player.getChipstack()) {
+                            JOptionPane.showMessageDialog(null, "You cannot bet more than your chip stack!", "Invalid Bet", JOptionPane.WARNING_MESSAGE);
+                            continue; 
+                        }
+                    }
+                    break;
+                }
+                actionlog.addValidaction(player, action1);
                 // Bob's turn
-                String actionBob = gui.setTXHM(player2, community, true).get();
-                System.out.println("Bob pressed: " + actionBob);
-                player.setChipstack(300);
-                String actionAlice2 = gui.setTXHM(player, community, true).get();
-                System.out.println("Alice pressed: " + actionAlice);
+                PlayerAction action2;
+                while (true) {
+                    action2 = gui.setTXHM(player2, community,pot, true).get(); 
+                    int amount = action2.getAmount();
+                    if (action2.getType() == ActionType.BET || action2.getType() == ActionType.RAISE) {
+                        if (amount > player.getChipstack()) {
+                            JOptionPane.showMessageDialog(null, "You cannot bet more than your chip stack!", "Invalid Bet", JOptionPane.WARNING_MESSAGE);
+                            continue; 
+                        }
+                    }
+                    break;
+                }
+                actionlog.addValidaction(player2, action2);
+                // Alice's next turn
+                PlayerAction action3;
+                while (true) {
+                    action3 = gui.setTXHM(player, community,pot,true).get(); 
+                    int amount = action3.getAmount();
+                    if (action3.getType() == ActionType.BET || action3.getType() == ActionType.RAISE) {
+                        if (amount > player.getChipstack()) {
+                            continue; 
+                        }
+                    }
+                    break;
+                }
 
+                actionlog.addValidaction(player, action3);
                 System.out.println("Test complete");
-            } catch (Exception e) {
-                e.printStackTrace();
+
+            } catch (HeadlessException | InterruptedException | ExecutionException e) {
             }
        
     }

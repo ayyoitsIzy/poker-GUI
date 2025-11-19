@@ -15,14 +15,15 @@ public class Player {
         this.chipStack = chipStack;
         this.name = name;
     }
-    public void fold(){
-        isFolded = true;
-    }
+    
     public List<Card> getHand(){
         return holeCard;
     }
     public int getChipstack(){
         return chipStack;
+    }
+    public String getName(){
+        return name;
     }
     public void setChipstack(int amount){
         this.chipStack = amount;

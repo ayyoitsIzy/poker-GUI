@@ -18,8 +18,20 @@ public class PlayerAction {
         this.type = type;
         this.amount = Amount;        
     }
+    
     public PlayerAction(ActionType type) {
         this.type = type;     
     }
+
+    public ActionType getType(){
+        return this.type;
+        }
+    public int getAmount(){
+        return this.amount;
+    }
     
-}
+    
+        
+    }
+    
+
