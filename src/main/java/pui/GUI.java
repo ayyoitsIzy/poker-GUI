@@ -55,10 +55,8 @@ public class GUI extends JFrame implements ActionListener {
         titleFont = new Font("Helvetica", Font.PLAIN, 50);
     }
 
-    public void setTitle(String title){
-            this.title = new JLabel(title);
-    }
-    
+    //=================================GUI SHOW METHOD===============================//
+
     public CompletableFuture<String> setMainmenu() {
         CompletableFuture<String> result = new CompletableFuture<>();
         UI.getContentPane().removeAll();
@@ -96,7 +94,62 @@ public class GUI extends JFrame implements ActionListener {
         return result;
     }
 
-    public void setMinBet(int minbet){this.minbet = minbet;}
+    public CompletableFuture<Boolean> setResult(Map<Player,Integer> Distributed){
+
+        JPanel Aside = new JPanel();
+        Aside.setBackground(Color.lightGray);
+        Aside.setBorder(BorderFactory.createEtchedBorder());
+        Aside.setPreferredSize(new Dimension(200, 5));
+       
+
+        JPanel Aside2 = new JPanel();
+        Aside2.setBackground(Color.lightGray);
+        Aside2.setBorder(BorderFactory.createEtchedBorder());
+        Aside2.setPreferredSize(new Dimension(200, 5));
+       
+        
+
+        JPanel Center = new JPanel();
+        Center.setBackground(pokerGreen);
+        Center.setPreferredSize(new Dimension(500, 500));
+        Center.setLocation(500, 150);
+        Center.setLayout((new BoxLayout(Center, FlowLayout.CENTER)));
+
+
+        UI.getContentPane().removeAll();
+        done = buttonmaker("done");
+        JLabel Logo = new JLabel(Iconmaker("IMG/Result.png",3));
+        done.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Logo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        Center.add(Logo);
+
+        for (Map.Entry<Player,Integer> Player: Distributed.entrySet()){
+              JLabel log = new JLabel();
+              Font font = new Font("Helvetica", Font.PLAIN, 30);
+              log.setFont(font);
+              log.setForeground(Color.WHITE);
+              log.setText(String.format("%s : %d $", Player.getKey().getName(), Player.getValue()));
+              log.setAlignmentX(Component.CENTER_ALIGNMENT);
+              Center.add(log);
+              Center.add(Box.createVerticalStrut(15));
+        }
+
+        Center.add(Box.createVerticalStrut(50));
+        Center.add(done);
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        done.addActionListener(e -> result.complete(true));
+        UI.add(Center);
+        UI.add(Aside,BorderLayout.EAST);
+        UI.add(Aside2,BorderLayout.WEST);
+        // UI.add(Top,BorderLayout.NORTH);
+        // UI.add(Bottom,BorderLayout.SOUTH);
+        UI.revalidate();
+        UI.repaint();
+
+        return result;
+        
+    }
 
     public CompletableFuture<PlayerAction> setGUI(Player player, boolean betted) {
         
@@ -274,6 +327,17 @@ public class GUI extends JFrame implements ActionListener {
         return result;
     }
 
+    //===============================================================================//
+
+    //=================================INFO SET/UTILITY===============================//
+
+
+    public void setTitle(String title){
+            this.title = new JLabel(title);
+    }
+
+    public void setMinBet(int minbet){this.minbet = minbet;}
+
     public void revealCommunitycard(){
         flipped += 1;
     }   
@@ -293,69 +357,15 @@ public class GUI extends JFrame implements ActionListener {
         flipped = 0;
     }
 
-    public CompletableFuture<Boolean> setResult(Map<Player,Integer> Distributed){
-
-        JPanel Aside = new JPanel();
-        Aside.setBackground(Color.lightGray);
-        Aside.setBorder(BorderFactory.createEtchedBorder());
-        Aside.setPreferredSize(new Dimension(200, 5));
-       
-
-        JPanel Aside2 = new JPanel();
-        Aside2.setBackground(Color.lightGray);
-        Aside2.setBorder(BorderFactory.createEtchedBorder());
-        Aside2.setPreferredSize(new Dimension(200, 5));
-       
-        
-
-        JPanel Center = new JPanel();
-        Center.setBackground(pokerGreen);
-        Center.setPreferredSize(new Dimension(500, 500));
-        Center.setLocation(500, 150);
-        Center.setLayout((new BoxLayout(Center, FlowLayout.CENTER)));
-
-
-        UI.getContentPane().removeAll();
-        done = buttonmaker("done");
-        JLabel Logo = new JLabel(Iconmaker("IMG/Result.png",3));
-        done.setAlignmentX(Component.CENTER_ALIGNMENT);
-        Logo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        Center.add(Logo);
-
-        for (Map.Entry<Player,Integer> Player: Distributed.entrySet()){
-              JLabel log = new JLabel();
-              Font font = new Font("Helvetica", Font.PLAIN, 30);
-              log.setFont(font);
-              log.setForeground(Color.WHITE);
-              log.setText(String.format("%s : %d $", Player.getKey().getName(), Player.getValue()));
-              log.setAlignmentX(Component.CENTER_ALIGNMENT);
-              Center.add(log);
-              Center.add(Box.createVerticalStrut(15));
-        }
-
-        Center.add(Box.createVerticalStrut(50));
-        Center.add(done);
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
-        done.addActionListener(e -> result.complete(true));
-        UI.add(Center);
-        UI.add(Aside,BorderLayout.EAST);
-        UI.add(Aside2,BorderLayout.WEST);
-        // UI.add(Top,BorderLayout.NORTH);
-        // UI.add(Bottom,BorderLayout.SOUTH);
-        UI.revalidate();
-        UI.repaint();
-
-        return result;
-        
-    }
-
     public void setActionlog(Map<Player,PlayerAction> actionLog){this.actionLog = actionLog;}
 
     @Override
     public void actionPerformed(ActionEvent e) {
         //////////////////////////////////////////////
     }
+    
+    //====================================================================================//
+
     //HELPER----------------------------------------------------------------------------------------------------
     
     private ImageIcon getcardIcon(Card card, int scale) {
