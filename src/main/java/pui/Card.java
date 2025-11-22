@@ -29,6 +29,8 @@ public class Card {
         this.rank = rank;
         this.suit = suit;
     }
+    
+    //constructor for demo purpose
 
     public Rank getrank(){return this.rank;}
     public Suit getSuit(){return this.suit;}

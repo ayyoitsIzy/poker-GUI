@@ -2,24 +2,35 @@ package pui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.Console;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 
 public class GUI extends JFrame implements ActionListener {
-    private JFrame UI;
+    //infra requirement : player info getter(name,holecard,chipstack),card info getter,action type constructor,action type getter(type,amount),
+    //and game mode maker to be able to access coummunity card,list of current pot (amount in int),min bet,Map of player and thier chip gain at the end of the game;
+    //inorder to provide gui the amount it needed 
+
+    //info
+    Map<Player, PlayerAction> actionLog;
+    List<Card> community_card;
+    List<Integer> pot;
+    int minbet;
+    int flipped;
+    //ui component
+    JFrame UI;
     Color pokerGreen;
     ImageIcon icon;
     URL imageUrl;
     JLabel title;
-    JButton bet, raise, call, check, fold;
+    JButton bet, raise, call, check, fold,Gamemode1,Gamemode2,Gamemode3,done;
     Font display, titleFont;
-    ActionLog actionLog;
-    public GUI(ActionLog actionLog) {
-        this.actionLog = actionLog;
+    public GUI() {
+        flipped = 0;
         imageUrl = GUI.class.getResource("IMG/icon.png");
         icon = new ImageIcon(imageUrl);
         pokerGreen = new Color(0x35654d);
@@ -37,26 +48,68 @@ public class GUI extends JFrame implements ActionListener {
         call = buttonmaker("call");
         check = buttonmaker("check");
         fold = buttonmaker("fold");
-
+        Gamemode1 = buttonmaker("Texas hold em");
+        Gamemode2 = buttonmaker("Omaha");
+        Gamemode3 = buttonmaker("Five card drawn");
         display = new Font("Helvetica", Font.PLAIN, 25);
         titleFont = new Font("Helvetica", Font.PLAIN, 50);
     }
 
-    public CompletableFuture<PlayerAction> setTXHM(Player player, List<Card> community_card,List<Integer> pot, boolean betted) {
+    public void setTitle(String title){
+            this.title = new JLabel(title);
+    }
+    
+    public CompletableFuture<String> setMainmenu() {
+        CompletableFuture<String> result = new CompletableFuture<>();
+        UI.getContentPane().removeAll();
+        flipped = 0;
+        minbet = 0;
+        JPanel Center = new JPanel();
+        Center.setBackground(pokerGreen);
+        Center.setPreferredSize(new Dimension(50, 50));
+        Center.setLayout((new BoxLayout(Center, FlowLayout.CENTER)));
+        Gamemode1.setPreferredSize(new Dimension(500, 50));
+        Gamemode2.setPreferredSize(new Dimension(500, 50));
+        Gamemode3.setPreferredSize(new Dimension(500, 50));
+        Gamemode1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Gamemode2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Gamemode3.setAlignmentX(Component.CENTER_ALIGNMENT);
+        UI.add(Center,BorderLayout.CENTER);
         
-        //infra requirement : player info getter(name,holecard,chipstack),card info getter,action type constructor,action type getter(type amount),list of current pot (amount in int) 
-        //and game mode to be able to access coummunity card;
+        JLabel Logolabel = new JLabel(Iconmaker("IMG/Logo.png", 3));
+        Logolabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        Center.add(Logolabel);
+        Center.add(Box.createVerticalStrut(50));
+        Center.add(Gamemode1);
+        Center.add(Box.createVerticalStrut(15));
+        Center.add(Gamemode2);
+        Center.add(Box.createVerticalStrut(15));
+        Center.add(Gamemode3);
+        UI.revalidate();
+        UI.repaint();
 
+        Gamemode1.addActionListener(e -> result.complete("1"));
+        Gamemode2.addActionListener(e -> result.complete("2"));
+        Gamemode3.addActionListener(e -> result.complete("3"));
+        
+        return result;
+    }
+
+    public void setMinBet(int minbet){this.minbet = minbet;}
+
+    public CompletableFuture<PlayerAction> setGUI(Player player, boolean betted) {
+        
+        
         CompletableFuture<PlayerAction> result = new CompletableFuture<>();
 
-        // Title
-        title = new JLabel("Texas Hold 'em");
+        // title
         title.setHorizontalAlignment(JLabel.CENTER);
         title.setVerticalAlignment(JLabel.TOP);
         title.setForeground(new Color(0xF9F6EE));
         title.setFont(titleFont);
 
-        // Panels
+        // panels
         JPanel Top = new JPanel();
         Top.setBackground(Color.gray);
         Top.setBorder(BorderFactory.createEtchedBorder());
@@ -67,9 +120,6 @@ public class GUI extends JFrame implements ActionListener {
         Aside.setBorder(BorderFactory.createEtchedBorder());
         Aside.setPreferredSize(new Dimension(200, 5));
         Aside.setLayout(new BoxLayout(Aside, BoxLayout.Y_AXIS));
-
-
-
 
         JPanel Aside2 = new JPanel();
         Aside2.setBackground(Color.lightGray);
@@ -100,21 +150,25 @@ public class GUI extends JFrame implements ActionListener {
         ChooseArea.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15));
 
         //add action log
-        List<Player> playerLog = actionLog.getPlayers();
-        List<PlayerAction> playerActions = actionLog.getLog();
         Font AsideFont = new Font("Helvetica", Font.PLAIN, 20);
-        for (int i = 0; i < playerActions.size(); i++) {
-            JLabel log = new JLabel();
+        if (!actionLog.isEmpty()) {
+        for (Map.Entry<Player,PlayerAction> playerLog: actionLog.entrySet()) {
+              JLabel log = new JLabel();
             log.setFont(AsideFont);
-            switch (playerActions.get(i).getType()) {
+            switch (playerLog.getValue().getType()) {
                 case BET, RAISE :
-                    log.setText(String.format("%s : %s %d $", playerLog.get(i).getName(),playerActions.get(i).getType().name(),playerActions.get(i).getAmount()));
+                    log.setText(String.format("%s : %s %d $", playerLog.getKey().getName(),playerLog.getValue().getType().name(),playerLog.getValue().getAmount()));
                     break;
                 default :
-                    log.setText(String.format("%s : %s ", playerLog.get(i).getName(),playerActions.get(i).getType()));
+                    log.setText(String.format("%s : %s ",  playerLog.getKey().getName(),playerLog.getValue().getType().name()));
         }
-        Aside.add(log);   
+        Aside.add(log); 
     }
+            
+        }
+        
+
+
         //add pot info
         for (int i = 0; i < pot.size(); i++) {
             JLabel log = new JLabel();
@@ -127,13 +181,21 @@ public class GUI extends JFrame implements ActionListener {
             Aside2.add(log);
         }
 
-        // Add community cards
-        for (Card card : community_card) {
+        // add community card
+        for (int i = 0; i < flipped; i++) {
+            Card card = community_card.get(i);
             JLabel cardimg = new JLabel(getcardIcon(card, 6));
             Center.add(cardimg);
         }
+        for (int i = 0; i < community_card.size()-flipped; i++) {
+            JLabel cardimg = new JLabel(getBackIcon(6));
+            Center.add(cardimg);
+        }
+        
 
-        // Player cards
+
+
+        // player cards
         JLabel yourcard = new JLabel("Your card");
         yourcard.setForeground(new Color(0xF9F6EE));
         yourcard.setFont(titleFont);
@@ -145,6 +207,9 @@ public class GUI extends JFrame implements ActionListener {
         JLabel yourchip = new JLabel(String.format("Your Chip : %d $", player.getChipstack()));
         yourchip.setForeground(new Color(0xF9F6EE));
         yourchip.setFont(display);
+        JLabel minbet = new JLabel(String.format("Min bet : %d $", this.minbet));
+        minbet.setForeground(new Color(0xF9F6EE));
+        minbet.setFont(display);
         
 
         Bottom.add(ChooseArea, BorderLayout.SOUTH);
@@ -161,6 +226,7 @@ public class GUI extends JFrame implements ActionListener {
         ChooseArea.add(check);
         ChooseArea.add(fold);
         ChooseArea.add(yourchip);
+        ChooseArea.add(minbet);
         ChooseArea.add(field);
         raise.setEnabled(true);
         call.setEnabled(true);
@@ -208,12 +274,91 @@ public class GUI extends JFrame implements ActionListener {
         return result;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    public void revealCommunitycard(){
+        flipped += 1;
+    }   
+    
+    public void revealCommunitycard(int amount){
+        flipped += amount;
+    } 
+    
+    public void setCommunitycard(List<Card> community_card){
+        this.community_card = community_card;
+    }
+    
+    public void setPot(List<Integer> Pot){this.pot = Pot;}
+
+    public void resetinfo(){
+        minbet = 0;
+        flipped = 0;
+    }
+
+    public CompletableFuture<Boolean> setResult(Map<Player,Integer> Distributed){
+
+        JPanel Aside = new JPanel();
+        Aside.setBackground(Color.lightGray);
+        Aside.setBorder(BorderFactory.createEtchedBorder());
+        Aside.setPreferredSize(new Dimension(200, 5));
+       
+
+        JPanel Aside2 = new JPanel();
+        Aside2.setBackground(Color.lightGray);
+        Aside2.setBorder(BorderFactory.createEtchedBorder());
+        Aside2.setPreferredSize(new Dimension(200, 5));
+       
+        
+
+        JPanel Center = new JPanel();
+        Center.setBackground(pokerGreen);
+        Center.setPreferredSize(new Dimension(500, 500));
+        Center.setLocation(500, 150);
+        Center.setLayout((new BoxLayout(Center, FlowLayout.CENTER)));
+
+
+        UI.getContentPane().removeAll();
+        done = buttonmaker("done");
+        JLabel Logo = new JLabel(Iconmaker("IMG/Result.png",3));
+        done.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Logo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        Center.add(Logo);
+
+        for (Map.Entry<Player,Integer> Player: Distributed.entrySet()){
+              JLabel log = new JLabel();
+              Font font = new Font("Helvetica", Font.PLAIN, 30);
+              log.setFont(font);
+              log.setForeground(Color.WHITE);
+              log.setText(String.format("%s : %d $", Player.getKey().getName(), Player.getValue()));
+              log.setAlignmentX(Component.CENTER_ALIGNMENT);
+              Center.add(log);
+              Center.add(Box.createVerticalStrut(15));
+        }
+
+        Center.add(Box.createVerticalStrut(50));
+        Center.add(done);
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        done.addActionListener(e -> result.complete(true));
+        UI.add(Center);
+        UI.add(Aside,BorderLayout.EAST);
+        UI.add(Aside2,BorderLayout.WEST);
+        // UI.add(Top,BorderLayout.NORTH);
+        // UI.add(Bottom,BorderLayout.SOUTH);
+        UI.revalidate();
+        UI.repaint();
+
+        return result;
         
     }
 
-    public ImageIcon getcardIcon(Card card, int scale) {
+    public void setActionlog(Map<Player,PlayerAction> actionLog){this.actionLog = actionLog;}
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        //////////////////////////////////////////////
+    }
+    //HELPER----------------------------------------------------------------------------------------------------
+    
+    private ImageIcon getcardIcon(Card card, int scale) {
         ImageIcon cardUrl = new ImageIcon(getCardURL(card));
         Image rawimg = cardUrl.getImage();
         Image scaledImage = rawimg.getScaledInstance(rawimg.getWidth(rootPane) / scale,
@@ -225,6 +370,17 @@ public class GUI extends JFrame implements ActionListener {
         String url = String.format("IMG/Card/%s/%s.png", card.getSuit().name(), card.getrank().name());
         return GUI.class.getResource(url);
     }
+    private URL getBackURL() {
+        String url = String.format("IMG/Card/back.png");
+        return GUI.class.getResource(url);
+    }
+    private ImageIcon getBackIcon(int scale) {
+        ImageIcon cardUrl = new ImageIcon(getBackURL());
+        Image rawimg = cardUrl.getImage();
+        Image scaledImage = rawimg.getScaledInstance(rawimg.getWidth(rootPane) / scale,
+                rawimg.getHeight(rootPane) / scale, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage);
+    }
 
     private JButton buttonmaker(String text) {
         JButton button = new JButton(text);
@@ -232,5 +388,14 @@ public class GUI extends JFrame implements ActionListener {
         button.setFont(new Font("Helvetica", Font.PLAIN, 30));
         button.setPreferredSize(new Dimension(220, 50));
         return button;
+    }
+
+    private ImageIcon Iconmaker(String URL,int scale){
+        URL url = getClass().getResource(URL);
+        ImageIcon Logoicon = new ImageIcon(url);
+        Image rawLogo = Logoicon.getImage();
+        Image scaledImage = rawLogo.getScaledInstance(rawLogo.getWidth(rootPane) / scale,rawLogo.getHeight(rootPane) / scale, Image.SCALE_SMOOTH);
+        ImageIcon LogoURL = new ImageIcon(scaledImage);
+        return LogoURL;
     }
 }
