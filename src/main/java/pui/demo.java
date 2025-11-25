@@ -13,11 +13,14 @@ public class demo {
         List<Card> alicehand = new ArrayList<>();
         alicehand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
         alicehand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
+        alicehand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
+        alicehand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
         
-
         Player player = new Player("Alice", alicehand, 4000);
 
         List<Card> bobhand = new ArrayList<>();
+        bobhand.add(new Card(Card.Rank.JACK, Card.Suit.DIAMONDS));
+        bobhand.add(new Card(Card.Rank.KING, Card.Suit.HEARTS));
         bobhand.add(new Card(Card.Rank.JACK, Card.Suit.DIAMONDS));
         bobhand.add(new Card(Card.Rank.KING, Card.Suit.HEARTS));
         Player player2 = new Player("Bob", bobhand, 3000);
@@ -33,11 +36,13 @@ public class demo {
         pot.add(3000);
         pot.add(1200);
             try {
+                gui.revealCommunitycard(3);
                 gui.setCommunitycard(community);
                 gui.setPot(pot);
                 gui.setActionlog(actionlog);
                 while (true) { 
                 String choice = gui.setMainmenu().get();
+
                 // Alice's turn
                 switch (choice) {
                     case "1":
@@ -52,7 +57,8 @@ public class demo {
                     default:
                         throw new AssertionError();
                 };
-                gui.revealCommunitycard(3);
+                
+                
                 PlayerAction action1;
                 while (true) {
                     action1 = gui.setGUI(player,false).get(); 
@@ -65,8 +71,8 @@ public class demo {
                     }
                     break;
                 }
+                gui.Cover("next player turn").get(); 
                 actionlog.put(player,action1);//add valid action to action log
-      
                 // Bob's turn
                 PlayerAction action2;
                 while (true) {
@@ -83,6 +89,7 @@ public class demo {
                  actionlog.put(player2,action2);//add valid action to action log
                 gui.revealCommunitycard();
                 pot.add(30000);
+                gui.Cover("new turn").get();
                 //new turn
                 // Alice's new turn
                 actionlog.clear();//newturn thus clear action log
@@ -98,6 +105,7 @@ public class demo {
                     break;
                 }
                  actionlog.put(player,action3);
+                gui.Cover("next player turn").get(); 
                  // Bob's new turn
                  PlayerAction action4;
                 while (true) {
@@ -111,6 +119,17 @@ public class demo {
                     break;
                 }
                  actionlog.put(player2,action4);
+                    List<Card> AliceCards = new ArrayList<>();
+                    gui.Cover("Play end player 1 chose omaha card").get();
+                    AliceCards.addAll(gui.setOmaha1(player).get());
+                    AliceCards.addAll(gui.setOmaha2(player).get());
+                    for (Card card : AliceCards) {
+                        System.out.println(card.getSuit().name());
+                        System.out.println(card.getrank().name());
+                    }
+                    gui.Cover("Next player omaha chose").get();
+                    gui.setOmaha1(player2).get();
+                    gui.setOmaha2(player2).get();
                  //Concealed the Conclusion
                  gui.resetinfo();
                  Map<Player,Integer> Distributed = new HashMap<>();

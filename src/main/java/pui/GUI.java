@@ -3,6 +3,7 @@ package pui;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +14,7 @@ import javax.swing.border.Border;
 public class GUI extends JFrame implements ActionListener {
     //infra requirement : player info getter(name,holecard,chipstack),card info getter,action type constructor,action type getter(type,amount),
     //and game mode maker to be able to access coummunity card,list of current pot (amount in int),min bet,Map of player and thier chip gain at the end of the game;
+    // you may refrence to placeholder class to see what i mean lol
     //inorder to provide gui the amount it needed 
 
     //info
@@ -112,7 +114,6 @@ public class GUI extends JFrame implements ActionListener {
         JPanel Center = new JPanel();
         Center.setBackground(pokerGreen);
         Center.setPreferredSize(new Dimension(500, 500));
-        Center.setLocation(500, 150);
         Center.setLayout((new BoxLayout(Center, FlowLayout.CENTER)));
 
 
@@ -223,7 +224,8 @@ public class GUI extends JFrame implements ActionListener {
 
 
         //add pot info
-        for (int i = 0; i < pot.size(); i++) {
+        if (pot != null){
+            for (int i = 0; i < pot.size(); i++) {
             JLabel log = new JLabel();
             log.setFont(AsideFont);
             if(i==0){
@@ -233,9 +235,12 @@ public class GUI extends JFrame implements ActionListener {
             }
             Aside2.add(log);
         }
+        }
+        
 
         // add community card
-        for (int i = 0; i < flipped; i++) {
+        if (community_card != null){
+            for (int i = 0; i < flipped; i++) {
             Card card = community_card.get(i);
             JLabel cardimg = new JLabel(getcardIcon(card, 6));
             Center.add(cardimg);
@@ -243,6 +248,8 @@ public class GUI extends JFrame implements ActionListener {
         for (int i = 0; i < community_card.size()-flipped; i++) {
             JLabel cardimg = new JLabel(getBackIcon(6));
             Center.add(cardimg);
+        }
+        
         }
         
 
@@ -327,6 +334,228 @@ public class GUI extends JFrame implements ActionListener {
         return result;
     }
 
+    public CompletableFuture<Boolean> Cover(String string){
+        UI.getContentPane().removeAll();
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        done = buttonmaker(string);
+        done.addActionListener(e -> result.complete(true));
+        done.setPreferredSize(new Dimension(500, 50));
+        done.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel Center = new JPanel();
+        Center.setBackground(pokerGreen);
+        Center.setLayout((new BoxLayout(Center, FlowLayout.CENTER)));
+        UI.add(Center);
+        Center.add(Box.createVerticalGlue());  
+        Center.add(done);
+        Center.add(Box.createVerticalGlue());
+        UI.revalidate();
+        UI.repaint();
+        return result;
+    }
+
+    public CompletableFuture<List<Card>> setOmaha1(Player player){
+        UI.getContentPane().removeAll();
+        CompletableFuture<List<Card>> result = new CompletableFuture<>();
+        List<Card> chosen = new ArrayList<>();
+        JPanel Top = new JPanel();
+        Top.setBackground(Color.gray);
+        Top.setBorder(BorderFactory.createEtchedBorder());
+        Top.setPreferredSize(new Dimension(5, 100));
+
+        JPanel Center = new JPanel();
+        Center.setBackground(pokerGreen);
+        Center.setPreferredSize(new Dimension(50, 50));
+        Center.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 75));
+
+        JPanel Bottom = new JPanel();
+        Bottom.setBackground(Color.gray);
+        Bottom.setPreferredSize(new Dimension(50, 300));
+        Bottom.setLayout(new BorderLayout());
+
+        JPanel PlayerCardPanel = new JPanel();
+        PlayerCardPanel.setBorder(BorderFactory.createEtchedBorder());
+        PlayerCardPanel.setBackground(pokerGreen);
+        PlayerCardPanel.setPreferredSize(new Dimension(50, 150));
+        PlayerCardPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15));
+
+        JPanel ChooseArea = new JPanel();
+        ChooseArea.setBackground(Color.DARK_GRAY);
+        ChooseArea.setBorder(BorderFactory.createEtchedBorder());
+        ChooseArea.setPreferredSize(new Dimension(50, 150));
+        ChooseArea.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15));
+
+        //add jlabel
+        JLabel title = new JLabel(String.format("%s : Choose community card", player.getName()));
+        title.setFont(titleFont);
+        title.setForeground(Color.WHITE);
+        Top.add(title);
+
+        //add coumunity card
+         for (int i = 0; i < 5; i++) {
+            Card card = community_card.get(i);
+            JLabel cardimg = new JLabel(getcardIcon(card, 6));
+            Center.add(cardimg);
+        }
+
+        //player card
+        List<Card> playerHand = player.getHand();
+        for (int i = 0; i < playerHand.size(); i++) {
+            Card card = playerHand.get(i);
+            JLabel cardimg = new JLabel(getcardIcon(card, 10));
+            PlayerCardPanel.add(cardimg);
+        }
+        //Choose area
+
+        
+        
+        JButton C1,C2,C3,C4,C5;
+        C1 = buttonmaker("1");
+        C2 = buttonmaker("2");
+        C3 = buttonmaker("3");
+        C4 = buttonmaker("4");
+        C5 = buttonmaker("5");
+        C1.addActionListener(e->{chosen.add(community_card.get(0));
+            C1.setEnabled(false);
+            if(chosen.size() == 3)
+                {result.complete(chosen);};});
+        C2.addActionListener(e->{chosen.add(community_card.get(1));
+            C2.setEnabled(false);
+            if(chosen.size() == 3)
+                {result.complete(chosen);};});
+        C3.addActionListener(e->{chosen.add(community_card.get(2));
+            C3.setEnabled(false);
+            if(chosen.size() == 3)
+                {result.complete(chosen);};});
+        C4.addActionListener(e->{chosen.add(community_card.get(3));
+            C4.setEnabled(false);
+            if(chosen.size() == 3)
+                {result.complete(chosen);};});
+        C5.addActionListener(e->{chosen.add(community_card.get(4));
+            C5.setEnabled(false);
+            if(chosen.size() == 3)
+                {result.complete(chosen);};});
+        
+        ChooseArea.add(C1);
+        ChooseArea.add(C2);
+        ChooseArea.add(C3);
+        ChooseArea.add(C4);
+        ChooseArea.add(C5);
+
+
+        UI.add(Top,BorderLayout.NORTH);
+        UI.add(Center,BorderLayout.CENTER);
+        UI.add(Bottom,BorderLayout.SOUTH);
+        Bottom.add(PlayerCardPanel,BorderLayout.NORTH);
+        Bottom.add(ChooseArea,BorderLayout.SOUTH);
+        UI.revalidate();
+        UI.repaint();
+      
+            return result;
+          
+        
+    
+    }
+    public CompletableFuture<List<Card>> setOmaha2(Player player){
+        UI.getContentPane().removeAll();
+        CompletableFuture<List<Card>> result = new CompletableFuture<>();
+        List<Card> chosen = new ArrayList<>();
+        JPanel Top = new JPanel();
+        Top.setBackground(Color.gray);
+        Top.setBorder(BorderFactory.createEtchedBorder());
+        Top.setPreferredSize(new Dimension(5, 100));
+
+        JPanel Center = new JPanel();
+        Center.setBackground(pokerGreen);
+        Center.setPreferredSize(new Dimension(50, 50));
+        Center.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 75));
+
+        JPanel Bottom = new JPanel();
+        Bottom.setBackground(Color.gray);
+        Bottom.setPreferredSize(new Dimension(50, 300));
+        Bottom.setLayout(new BorderLayout());
+
+        JPanel PlayerCardPanel = new JPanel();
+        PlayerCardPanel.setBorder(BorderFactory.createEtchedBorder());
+        PlayerCardPanel.setBackground(pokerGreen);
+        PlayerCardPanel.setPreferredSize(new Dimension(50, 150));
+        PlayerCardPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15));
+
+        JPanel ChooseArea = new JPanel();
+        ChooseArea.setBackground(Color.DARK_GRAY);
+        ChooseArea.setBorder(BorderFactory.createEtchedBorder());
+        ChooseArea.setPreferredSize(new Dimension(50, 150));
+        ChooseArea.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15));
+
+        //add jlabel
+        JLabel title = new JLabel(String.format("%s : Choose Player card", player.getName()));
+        title.setFont(titleFont);
+        title.setForeground(Color.WHITE);
+        Top.add(title);
+
+        //add coumunity card
+         for (int i = 0; i < 5; i++) {
+            Card card = community_card.get(i);
+            JLabel cardimg = new JLabel(getcardIcon(card, 6));
+            Center.add(cardimg);
+        }
+
+        //player card
+        List<Card> playerHand = player.getHand();
+        for (int i = 0; i < playerHand.size(); i++) {
+            Card card = playerHand.get(i);
+            JLabel cardimg = new JLabel(getcardIcon(card, 10));
+            PlayerCardPanel.add(cardimg);
+        }
+        //Choose area
+
+        
+        
+        JButton C1,C2,C3,C4,C5;
+        C1 = buttonmaker("1");
+        C2 = buttonmaker("2");
+        C3 = buttonmaker("3");
+        C4 = buttonmaker("4");
+        C5 = buttonmaker("5");
+        C1.addActionListener(e->{chosen.add(community_card.get(0));
+            C1.setEnabled(false);
+            if(chosen.size() == 2)
+                {result.complete(chosen);};});
+        C2.addActionListener(e->{chosen.add(community_card.get(1));
+            C2.setEnabled(false);
+            if(chosen.size() == 2)
+                {result.complete(chosen);};});
+        C3.addActionListener(e->{chosen.add(community_card.get(2));
+            C3.setEnabled(false);
+            if(chosen.size() == 2)
+                {result.complete(chosen);};});
+        C4.addActionListener(e->{chosen.add(community_card.get(3));
+            C4.setEnabled(false);
+            if(chosen.size() == 2)
+                {result.complete(chosen);};});
+        
+        
+        ChooseArea.add(C1);
+        ChooseArea.add(C2);
+        ChooseArea.add(C3);
+        ChooseArea.add(C4);
+       
+
+
+        UI.add(Top,BorderLayout.NORTH);
+        UI.add(Center,BorderLayout.CENTER);
+        UI.add(Bottom,BorderLayout.SOUTH);
+        Bottom.add(PlayerCardPanel,BorderLayout.NORTH);
+        Bottom.add(ChooseArea,BorderLayout.SOUTH);
+        UI.revalidate();
+        UI.repaint();
+      
+            return result;
+          
+        
+    
+    }
+
+
     //===============================================================================//
 
     //=================================INFO SET/UTILITY===============================//
@@ -408,4 +637,6 @@ public class GUI extends JFrame implements ActionListener {
         ImageIcon LogoURL = new ImageIcon(scaledImage);
         return LogoURL;
     }
+    
+
 }
