@@ -4,26 +4,15 @@ import java.awt.HeadlessException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.Box;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 public class demo {
     public static void main(String[] args) {
         Map<Player,PlayerAction> actionlog = new HashMap<>() ;
         GUI gui = new GUI();
-        List<Card> alicehand = new ArrayList<>();
-        alicehand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
-        alicehand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
-        alicehand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
-        alicehand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
         
-        Player player = new Player("Alice", alicehand, 4000);
-
-        List<Card> bobhand = new ArrayList<>();
-        bobhand.add(new Card(Card.Rank.JACK, Card.Suit.DIAMONDS));
-        bobhand.add(new Card(Card.Rank.KING, Card.Suit.HEARTS));
-        bobhand.add(new Card(Card.Rank.JACK, Card.Suit.DIAMONDS));
-        bobhand.add(new Card(Card.Rank.KING, Card.Suit.HEARTS));
-        Player player2 = new Player("Bob", bobhand, 3000);
 
         List<Card> community = new ArrayList<>();
         community.add(new Card(Card.Rank.ACE, Card.Suit.HEARTS));
@@ -36,14 +25,12 @@ public class demo {
         pot.add(3000);
         pot.add(1200);
             try {
-                gui.revealCommunitycard(3);
+                
                 gui.setCommunitycard(community);
                 gui.setPot(pot);
                 gui.setActionlog(actionlog);
                 while (true) { 
                 String choice = gui.setMainmenu().get();
-
-                // Alice's turn
                 switch (choice) {
                     case "1":
                         gui.setTitle("texas Hold em!");
@@ -57,8 +44,26 @@ public class demo {
                     default:
                         throw new AssertionError();
                 };
-                
-                
+                Map<String,Integer> playeranswer = gui.setPlayerInfo().get();
+                List<Player> playerlist = new LinkedList<>();
+                for (Map.Entry<String,Integer> name: playeranswer.entrySet()){
+                   List<Card> hand = new ArrayList<>();
+                    hand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
+                    hand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
+                    hand.add(new Card(Card.Rank.ACE, Card.Suit.DIAMONDS));
+                    hand.add(new Card(Card.Rank.TWO, Card.Suit.HEARTS));
+                    playerlist.add(new Player(name.getKey(), hand, name.getValue()));
+                 }
+
+
+              
+
+
+                Player player = playerlist.get(0);
+                Player player2 = playerlist.get(1);
+
+                 // Player1turn
+                gui.revealCommunitycard(3);
                 PlayerAction action1;
                 while (true) {
                     action1 = gui.setGUI(player,false).get(); 
@@ -73,7 +78,7 @@ public class demo {
                 }
                 gui.Cover("next player turn").get(); 
                 actionlog.put(player,action1);//add valid action to action log
-                // Bob's turn
+                 // Player2turn
                 PlayerAction action2;
                 while (true) {
                     action2 = gui.setGUI(player2,  true).get(); 
@@ -91,7 +96,7 @@ public class demo {
                 pot.add(30000);
                 gui.Cover("new turn").get();
                 //new turn
-                // Alice's new turn
+                // player1 new turn
                 actionlog.clear();//newturn thus clear action log
                 PlayerAction action3;
                 while (true) {
@@ -106,7 +111,7 @@ public class demo {
                 }
                  actionlog.put(player,action3);
                 gui.Cover("next player turn").get(); 
-                 // Bob's new turn
+                 // player2 new turn
                  PlayerAction action4;
                 while (true) {
                     action4 = gui.setGUI(player2, true).get(); 
@@ -127,9 +132,17 @@ public class demo {
                         System.out.println(card.getSuit().name());
                         System.out.println(card.getrank().name());
                     }
+
+
+                    //omaha choose card
                     gui.Cover("Next player omaha chose").get();
                     gui.setOmaha1(player2).get();
                     gui.setOmaha2(player2).get();
+
+
+
+
+
                  //Concealed the Conclusion
                  gui.resetinfo();
                  Map<Player,Integer> Distributed = new HashMap<>();

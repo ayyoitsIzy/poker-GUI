@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -249,7 +251,6 @@ public class GUI extends JFrame implements ActionListener {
             JLabel cardimg = new JLabel(getBackIcon(6));
             Center.add(cardimg);
         }
-        
         }
         
 
@@ -455,6 +456,7 @@ public class GUI extends JFrame implements ActionListener {
         
     
     }
+    
     public CompletableFuture<List<Card>> setOmaha2(Player player){
         UI.getContentPane().removeAll();
         CompletableFuture<List<Card>> result = new CompletableFuture<>();
@@ -555,6 +557,106 @@ public class GUI extends JFrame implements ActionListener {
     
     }
 
+    public CompletableFuture<Map<String,Integer>> setPlayerInfo(){
+        UI.getContentPane().removeAll();
+        CompletableFuture<Map<String,Integer>> result = new CompletableFuture<>();
+        JLabel Logolabel = new JLabel(Iconmaker("IMG/Logo.png", 6));
+        Logolabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel Top = new JPanel();
+        Top.setBackground(pokerGreen);
+
+        JPanel Aside1 = new JPanel();
+        Aside1.setBackground(pokerGreen);
+        Aside1.setPreferredSize(new Dimension(1366/2, 100));
+        Aside1.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 100));
+        Aside1.setBorder(BorderFactory.createEtchedBorder());
+
+        JPanel Aside2 = new JPanel();
+        Aside2.setBackground(pokerGreen);
+        Aside2.setPreferredSize(new Dimension(1366/2, 100));
+        Aside2.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 100));
+        Aside2.setBorder(BorderFactory.createEtchedBorder());
+
+        JPanel Bottom = new JPanel();
+        Bottom.setBackground(Color.lightGray);
+        Bottom.setPreferredSize(new Dimension(1366/2, 100));
+
+        JLabel player1 = new JLabel("Enter Player 1 Name :");
+        player1.setFont(display);
+        player1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player1.setForeground(Color.WHITE);
+        JLabel money1 = new JLabel("Enter Player 1 Money :");
+        money1.setFont(display);
+        money1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        money1.setForeground(Color.WHITE);
+        JTextField nameField = new JTextField();
+        nameField.setPreferredSize(new Dimension(220, 50));
+        nameField.setFont(new Font("Helvetica", Font.PLAIN, 30));
+        nameField.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JTextField moneyField = new JTextField();
+        moneyField.setPreferredSize(new Dimension(220, 50));
+        moneyField.setFont(new Font("Helvetica", Font.PLAIN, 30));
+
+        JLabel player2 = new JLabel("Enter Player 2 Name :");
+        player2.setFont(display);
+        player2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player2.setForeground(Color.WHITE);
+        JLabel money2 = new JLabel("Enter Player 2 Money :");
+        money2.setFont(display);
+        money2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        money2.setForeground(Color.WHITE);
+
+        JTextField nameField2 = new JTextField();
+        nameField2.setPreferredSize(new Dimension(220, 50));
+        nameField2.setFont(new Font("Helvetica", Font.PLAIN, 30));
+        nameField2.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JTextField moneyField2 = new JTextField();
+        moneyField2.setPreferredSize(new Dimension(220, 50));
+        moneyField2.setFont(new Font("Helvetica", Font.PLAIN, 30));
+        
+        JButton submit = buttonmaker("Submit");
+        submit.addActionListener(e -> {
+            try {
+
+                Map<String,Integer> answer = new HashMap<>();
+                int amount1 = Integer.parseInt(moneyField.getText());
+                int amount2 = Integer.parseInt(moneyField2.getText());
+                String name1 = nameField.getText();
+                String name2 = nameField2.getText();
+                answer.put(name1, amount1);
+                answer.put(name2, amount2);
+                result.complete(answer);
+            } catch (NumberFormatException ex) {
+                
+            }
+        });
+       
+
+        UI.add(Top,BorderLayout.NORTH);
+        UI.add(Aside1,BorderLayout.WEST);
+        UI.add(Aside2,BorderLayout.EAST);
+        UI.add(Bottom,BorderLayout.SOUTH);
+        Aside1.add(player1);
+        Aside1.add(nameField);
+        Aside1.add(money1);
+        Aside1.add(moneyField);
+        Aside1.add(Box.createVerticalGlue());
+        Aside2.add(player2);
+        Aside2.add(nameField2);
+        Aside2.add(money2);
+        Aside2.add(moneyField2);
+        Aside2.add(Box.createVerticalGlue());
+        Bottom.add(submit);
+        Top.add(Logolabel);
+        UI.revalidate();
+        UI.repaint();
+        return result;
+    }
+
+    
 
     //===============================================================================//
 
